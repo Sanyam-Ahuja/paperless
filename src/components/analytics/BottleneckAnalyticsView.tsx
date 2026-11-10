@@ -1,149 +1,51 @@
 import React from 'react';
 import { usePaperlessStore } from '../../store/usePaperlessStore';
 import { computeBottlenecks } from '../../engine/workflow';
-import { BarChart3, Clock, AlertTriangle, CheckCircle, TrendingUp, ShieldAlert } from 'lucide-react';
 
 export const BottleneckAnalyticsView: React.FC = () => {
   const { applications } = usePaperlessStore();
-
-  const bottlenecks = computeBottlenecks(applications);
-
-  const completedCount = applications.filter((a) => a.currentStage === 'completed').length;
-  const rejectedCount = applications.filter((a) => a.currentStage === 'rejected').length;
-  const totalCompletedOrRejected = completedCount + rejectedCount;
-  const completionRate = applications.length > 0
-    ? Math.round((completedCount / applications.length) * 100)
-    : 0;
-
-  // Find worst bottleneck
-  const worstBottleneck = [...bottlenecks].sort((a, b) => b.averageDwellHours - a.averageDwellHours)[0];
+  const rows = computeBottlenecks(applications);
+  const done = applications.filter((a) => a.currentStage === 'completed').length;
+  const rej = applications.filter((a) => a.currentStage === 'rejected').length;
+  const open = applications.length - done - rej;
+  const worst = [...rows].sort((a, b) => b.averageDwellHours - a.averageDwellHours)[0];
+  const max = Math.max(48, ...rows.map((r) => r.averageDwellHours));
+  const SLA = 24;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6 shadow-xl">
-        <div className="flex items-center space-x-2">
-          <span className="text-xs font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold uppercase">
-            Administrative Operations Telemetry
-          </span>
-          <span className="text-xs text-slate-500 font-mono">Service Level Agreement (SLA) Tracking</span>
+    <div className="max-w-[1000px]">
+      <h1 className="wide font-black text-[32px] md:text-[40px] leading-none">Where files wait</h1>
+      <p className="text-[19px] mt-4 max-w-[60ch] leading-snug">
+        Of <b>{applications.length}</b> files in the register, <b>{done}</b> are sanctioned, <b>{rej}</b> rejected and <b>{open}</b> still moving.
+        The slowest desk right now is <b className="bg-canary px-1">{worst?.label}</b>, where a file waits <b>{worst?.averageDwellHours} hours</b> on average.
+      </p>
+
+      <section className="sheet bg-whitecopy mt-8 p-5 md:p-8">
+        <div className="flex justify-between items-baseline border-b-2 border-navy pb-2 mb-5">
+          <h2 className="cond font-extrabold uppercase text-[20px]">Average hours on each desk</h2>
+          <span className="text-[13px] text-faint">dashed line · {SLA} h service standard</span>
         </div>
-        <h2 className="text-xl font-bold text-white mt-2">Bottleneck Diagnostics & Dwell Latency</h2>
-        <p className="text-sm text-slate-400 max-w-2xl mt-1">
-          Monitor desk-by-desk latency, approval backlogs, and stage rejection drop-off rates across administrative departments.
-        </p>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-            <span>COMPLETION RATE</span>
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
-            {completionRate}%
-          </div>
-          <p className="text-[10px] text-slate-500 mt-0.5">{completedCount} of {applications.length} finalized</p>
-        </div>
-
-        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-            <span>WORST BOTTLENECK</span>
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
-          </div>
-          <div className="text-base font-bold text-white mt-1 truncate">
-            {worstBottleneck?.label || 'None'}
-          </div>
-          <p className="text-[10px] text-amber-400 font-mono mt-0.5">{worstBottleneck?.averageDwellHours}h avg dwell</p>
-        </div>
-
-        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-            <span>REJECTED PETITIONS</span>
-            <ShieldAlert className="w-4 h-4 text-rose-400" />
-          </div>
-          <div className="text-2xl font-bold font-mono text-rose-400 mt-1">
-            {rejectedCount}
-          </div>
-          <p className="text-[10px] text-slate-500 mt-0.5">Policy non-compliance sink</p>
-        </div>
-
-        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-mono">
-            <span>ACTIVE WORK IN PROGRESS</span>
-            <Clock className="w-4 h-4 text-sky-400" />
-          </div>
-          <div className="text-2xl font-bold font-mono text-sky-400 mt-1">
-            {applications.length - totalCompletedOrRejected}
-          </div>
-          <p className="text-[10px] text-slate-500 mt-0.5">Currently moving in pipeline</p>
-        </div>
-      </div>
-
-      {/* Stage Latency Table */}
-      <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <h3 className="text-base font-bold text-white flex items-center space-x-2">
-          <BarChart3 className="w-4 h-4 text-sky-400" />
-          <span>Stage-by-Stage Latency & Backlog Analysis</span>
-        </h3>
-
-        <div className="space-y-3">
-          {bottlenecks.map((item) => {
-            const isWorst = item.stage === worstBottleneck?.stage;
-
+        <div className="space-y-5">
+          {rows.map((r) => {
+            const over = r.averageDwellHours > SLA;
             return (
-              <div
-                key={item.stage}
-                className={`p-4 rounded-xl border transition-all ${
-                  isWorst
-                    ? 'bg-amber-950/20 border-amber-500/50'
-                    : 'bg-slate-900 border-slate-800'
-                }`}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h4 className="font-bold text-sm text-white">{item.label}</h4>
-                      {isWorst && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold uppercase">
-                          Highest Latency
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-xs text-slate-400 font-mono">
-                      Queue: {item.activeCount} applications waiting
-                    </span>
-                  </div>
-
-                  <div className="flex items-center space-x-4 font-mono text-xs">
-                    <div className="text-right">
-                      <span className="text-slate-500 block text-[10px]">AVG DWELL</span>
-                      <span className="font-bold text-sky-400">{item.averageDwellHours} Hours</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-slate-500 block text-[10px]">REJECTION RATE</span>
-                      <span className={`font-bold ${item.rejectionRate > 15 ? 'text-rose-400' : 'text-slate-300'}`}>
-                        {item.rejectionRate}%
-                      </span>
-                    </div>
-                  </div>
+              <div key={r.stage} className="grid md:grid-cols-[200px_1fr_140px] gap-x-5 gap-y-1 items-center">
+                <div>
+                  <div className="font-bold leading-tight">{r.label}</div>
+                  <div className="text-[13px] text-faint">{r.activeCount} waiting now</div>
                 </div>
-
-                {/* Progress bar visual */}
-                <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden">
-                  <div
-                    style={{ width: `${Math.min(100, (item.averageDwellHours / 48) * 100)}%` }}
-                    className={`h-full rounded-full transition-all ${
-                      item.averageDwellHours > 30 ? 'bg-amber-500' : 'bg-sky-500'
-                    }`}
-                  />
+                <div className="relative h-8 bg-blotter/40 border border-navy/30">
+                  <div className={`h-full ${over ? 'bg-stampred/85' : 'bg-navy'}`} style={{ width: `${(r.averageDwellHours / max) * 100}%` }} />
+                  <span className="absolute top-[-4px] bottom-[-4px] border-l-2 border-dashed border-violet" style={{ left: `${(SLA / max) * 100}%` }} aria-hidden />
+                  <span className="absolute inset-y-0 left-2 flex items-center typed text-[13px] font-bold text-white mix-blend-difference">{r.averageDwellHours} h</span>
                 </div>
+                <div className="text-[13px] md:text-right"><span className="typed">{r.rejectionRate}%</span> <span className="text-faint">rejected here</span></div>
               </div>
             );
           })}
         </div>
-      </div>
+      </section>
+      <p className="text-[13px] text-faint mt-4">Hours on desk are simulated per file for this demonstration.</p>
     </div>
   );
 };

@@ -2,183 +2,76 @@ import React, { useState } from 'react';
 import { usePaperlessStore } from '../../store/usePaperlessStore';
 import { WorkflowStage } from '../../types';
 import { STAGE_CONFIG } from '../../engine/workflow';
-import { GitMerge, ArrowRight, ShieldAlert, CheckCircle, RefreshCw, AlertCircle } from 'lucide-react';
+import { SHORT_ROLE, copyFor } from '../paper/Paper';
 
-interface StateNode {
-  id: WorkflowStage;
-  label: string;
-  role: string;
-  type: 'initial' | 'intermediate' | 'terminal' | 'loopback';
-}
+const MAIN: WorkflowStage[] = ['submitted', 'advisor_review', 'hod_approval', 'dean_review', 'registrar_seal', 'completed'];
+const SHORT: Record<string, string> = { submitted: 'Submitted', advisor_review: 'Advisor review', hod_approval: 'HOD approval', dean_review: 'Dean sanction', registrar_seal: 'Registrar seal', completed: 'Sanctioned', revision_needed: 'Back to student', rejected: 'Rejected' };
+const W = 150, H = 74, GAP = 40, X0 = 20, Y0 = 40;
+const x = (i: number) => X0 + i * (W + GAP);
 
-const NODES: StateNode[] = [
-  { id: 'submitted', label: '1. Submission Queued', role: 'Student', type: 'initial' },
-  { id: 'advisor_review', label: '2. Academic Advisor Review', role: 'Advisor', type: 'intermediate' },
-  { id: 'hod_approval', label: '3. Head of Department', role: 'HOD', type: 'intermediate' },
-  { id: 'dean_review', label: '4. Dean Academics Sanction', role: 'Dean', type: 'intermediate' },
-  { id: 'registrar_seal', label: '5. Registrar Seal & Emboss', role: 'Registrar', type: 'intermediate' },
-  { id: 'completed', label: '6. Sanction Issued', role: 'System', type: 'terminal' },
-  { id: 'rejected', label: 'Terminal Rejection', role: 'All Authorities', type: 'terminal' },
-  { id: 'revision_needed', label: 'Amendment Loopback', role: 'Student', type: 'loopback' },
-];
-
+/** The routing diagram printed on the back of every form, drawn as a state machine. */
 export const StateMachineGraphView: React.FC = () => {
-  const { applications } = usePaperlessStore();
-  const [selectedNode, setSelectedNode] = useState<WorkflowStage>('advisor_review');
+  const { applications, setSelectedAppId, setActiveTab } = usePaperlessStore();
+  const [sel, setSel] = useState<WorkflowStage>('advisor_review');
+  const count = (s: WorkflowStage) => applications.filter((a) => a.currentStage === s).length;
+  const inSel = applications.filter((a) => a.currentStage === sel);
 
-  const getAppsInStage = (stage: WorkflowStage) => {
-    return applications.filter((a) => a.currentStage === stage);
+  const Node: React.FC<{ s: WorkflowStage; cx: number; cy: number; dashed?: boolean; fill: string }> = ({ s, cx, cy, dashed, fill }) => {
+    const on = s === sel;
+    const n = count(s);
+    return (
+      <g onClick={() => setSel(s)} className="cursor-pointer" role="button" tabIndex={0} aria-label={`${STAGE_CONFIG[s].label}, ${n} files`}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSel(s)}>
+        <rect x={cx} y={cy} width={W} height={H} fill={fill} stroke="#1b2a6b" strokeWidth={on ? 3 : 1.25} strokeDasharray={dashed ? '6 4' : undefined} />
+        <text x={cx + 10} y={cy + 22} fontSize="11" fontWeight="700" fill="#4a5584" style={{ fontStretch: '78%', letterSpacing: '0.06em' }}>{(SHORT_ROLE[STAGE_CONFIG[s].responsibleRole ?? ''] ?? 'Office').toUpperCase()}</text>
+        <text x={cx + 10} y={cy + 42} fontSize="14" fontWeight="800" fill="#1b2a6b" style={{ fontStretch: '80%' }}>{SHORT[s]}</text>
+        <text x={cx + 10} y={cy + 62} fontSize="13" fill="#1d1d1f" fontFamily="Courier Prime, monospace">{n} file{n === 1 ? '' : 's'}</text>
+        {n > 0 && <circle cx={cx + W - 14} cy={cy + 14} r="7" fill="#5b2d8e" />}
+      </g>
+    );
   };
 
+  const total = x(MAIN.length - 1) + W + X0;
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6 shadow-xl">
-        <div className="flex items-center space-x-2">
-          <span className="text-xs font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-semibold uppercase">
-            Deterministic Finite Automaton
-          </span>
-          <span className="text-xs text-slate-500 font-mono">Formal Verification of Academic Transitions</span>
-        </div>
-        <h2 className="text-xl font-bold text-white mt-2">Institutional Workflow State Machine</h2>
-        <p className="text-sm text-slate-400 max-w-2xl mt-1">
-          Visual representation of all valid institutional state transitions, role-based guards, and terminal conditions. Click any state node to inspect current queues and execution policies.
-        </p>
+    <div>
+      <h1 className="wide font-black text-[32px] md:text-[40px] leading-none">Routing</h1>
+      <p className="text-faint mt-2 mb-6 max-w-[70ch]">Every form moves left to right, one signature per box. Any desk can return a form to the student (it re-enters at the start) or reject it outright. Click a box to see what is sitting there.</p>
+
+      <div className="bg-whitecopy border border-navy overflow-x-auto">
+        <svg viewBox={`0 0 ${total} 300`} className="min-w-[980px] w-full" role="img" aria-label="Routing state machine">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1b2a6b" /></marker>
+            <marker id="arrv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b3202a" /></marker>
+          </defs>
+          {MAIN.slice(0, -1).map((_, i) => (
+            <line key={i} x1={x(i) + W} y1={Y0 + H / 2} x2={x(i + 1) - 2} y2={Y0 + H / 2} stroke="#1b2a6b" strokeWidth="1.5" markerEnd="url(#arr)" />
+          ))}
+          {/* return loop: from the review desks down to the amendment box, back up to submission */}
+          <path d={`M ${x(2) + W / 2} ${Y0 + H} L ${x(2) + W / 2} 196 L ${x(1) + W + 4} 196`} fill="none" stroke="#1b2a6b" strokeWidth="1.5" strokeDasharray="5 4" markerEnd="url(#arr)" />
+          <path d={`M ${x(1)} ${196 + 0} L ${x(0) + W / 2} 196 L ${x(0) + W / 2} ${Y0 + H + 4}`} fill="none" stroke="#1b2a6b" strokeWidth="1.5" strokeDasharray="5 4" markerEnd="url(#arr)" />
+          <path d={`M ${x(3) + W / 2} ${Y0 + H} L ${x(3) + W / 2} ${196 - 2}`} fill="none" stroke="#b3202a" strokeWidth="1.5" markerEnd="url(#arrv)" />
+          <text x={x(2) + W / 2 + 8} y={Y0 + H + 22} fontSize="12" fill="#4a5584">returned</text>
+          <text x={x(3) + W / 2 + 8} y={Y0 + H + 22} fontSize="12" fill="#b3202a">rejected</text>
+          {MAIN.map((s, i) => <Node key={s} s={s} cx={x(i)} cy={Y0} fill={s === 'completed' ? '#fdfdfb' : '#fff1a8'} />)}
+          <Node s="revision_needed" cx={x(1)} cy={196 - H / 2} dashed fill="#d3e4ff" />
+          <Node s="rejected" cx={x(3)} cy={196} fill="#ffd3dc" />
+        </svg>
       </div>
 
-      {/* Main Flow Canvas */}
-      <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6 shadow-xl">
-        <h3 className="text-sm font-bold text-white uppercase font-mono mb-4 flex items-center space-x-2">
-          <GitMerge className="w-4 h-4 text-purple-400" />
-          <span>Linear Sanction Pipeline (Forward Progress)</span>
-        </h3>
-
-        {/* Pipeline Stepper */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-          {NODES.filter((n) => n.type !== 'terminal' && n.type !== 'loopback').concat(
-            NODES.filter((n) => n.id === 'completed')
-          ).map((node, idx) => {
-            const count = getAppsInStage(node.id).length;
-            const isSelected = selectedNode === node.id;
-
-            return (
-              <div
-                key={node.id}
-                onClick={() => setSelectedNode(node.id)}
-                className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
-                  isSelected
-                    ? 'bg-purple-950/30 border-purple-500 ring-2 ring-purple-500/20 shadow-lg'
-                    : 'bg-slate-900 border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono text-slate-500 font-bold">
-                      STAGE 0{idx + 1}
-                    </span>
-                    <span className="w-5 h-5 rounded-full bg-slate-800 text-sky-400 text-[10px] font-mono flex items-center justify-center font-bold">
-                      {count}
-                    </span>
-                  </div>
-                  <h4 className="text-xs font-bold text-white mt-2 leading-snug">
-                    {node.label}
-                  </h4>
-                </div>
-
-                <div className="mt-3 pt-2 border-t border-slate-800/80">
-                  <span className="text-[10px] font-mono text-purple-300 block truncate">
-                    Role: {node.role}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Branching & Exceptional States */}
-        <div className="mt-8 pt-6 border-t border-slate-800">
-          <h3 className="text-sm font-bold text-white uppercase font-mono mb-4">
-            Exception & Loopback Handlers
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Revision Loopback */}
-            <div 
-              onClick={() => setSelectedNode('revision_needed')}
-              className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                selectedNode === 'revision_needed'
-                  ? 'bg-amber-950/30 border-amber-500'
-                  : 'bg-slate-900 border-slate-800'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <RefreshCw className="w-4 h-4 text-amber-400" />
-                  <span className="font-bold text-sm text-white">Revision Loopback (Non-Terminal)</span>
-                </div>
-                <span className="text-xs font-mono text-amber-300 font-bold">
-                  {getAppsInStage('revision_needed').length} Active
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mt-2">
-                Triggered when an authority requests additional documents. Returns control to student to amend declarations without cancelling the petition.
-              </p>
-            </div>
-
-            {/* Terminal Rejection */}
-            <div 
-              onClick={() => setSelectedNode('rejected')}
-              className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                selectedNode === 'rejected'
-                  ? 'bg-rose-950/30 border-rose-500'
-                  : 'bg-slate-900 border-slate-800'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="w-4 h-4 text-rose-400" />
-                  <span className="font-bold text-sm text-white">Terminal Rejection (Sink State)</span>
-                </div>
-                <span className="text-xs font-mono text-rose-300 font-bold">
-                  {getAppsInStage('rejected').length} Rejected
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mt-2">
-                Permanent rejection state. Can be initiated by Advisor, HOD, Dean, or Registrar upon severe policy violation or ineligible criteria.
-              </p>
-            </div>
+      <section className="mt-8">
+        <h2 className="cond font-extrabold uppercase text-[22px]">{STAGE_CONFIG[sel].label} <span className="typed font-normal text-[16px] normal-case text-faint">· {inSel.length} file{inSel.length === 1 ? '' : 's'}</span></h2>
+        {inSel.length === 0 ? <p className="text-faint mt-2">Nothing is sitting in this box right now.</p> : (
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-3">
+            {inSel.map((a) => (
+              <button key={a.id} onClick={() => { setSelectedAppId(a.id); setActiveTab('tracker'); }} className={`sheet ${copyFor(a.currentStage)} text-left p-4 hover:-translate-y-0.5 transition-transform`}>
+                <span className="typed font-bold text-[14px]">{a.id}</span>
+                <span className="block font-semibold mt-1 leading-snug">{a.title}</span>
+                <span className="block text-[13px] text-faint mt-1">{a.studentName} · open in register</span>
+              </button>
+            ))}
           </div>
-        </div>
-      </div>
-
-      {/* Selected State Inspector */}
-      <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6 shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div>
-            <span className="text-[10px] font-mono uppercase text-slate-500">INSPECTING STATE</span>
-            <h3 className="text-base font-bold text-white mt-0.5">{STAGE_CONFIG[selectedNode].label}</h3>
-          </div>
-          <span className="text-xs font-mono text-sky-400 px-2.5 py-1 rounded bg-sky-950/60 border border-sky-800/60">
-            {getAppsInStage(selectedNode).length} petitions currently in this state
-          </span>
-        </div>
-
-        <div className="mt-4 space-y-2 text-xs">
-          {getAppsInStage(selectedNode).length === 0 ? (
-            <p className="text-slate-500 italic">No applications currently queued at this state.</p>
-          ) : (
-            getAppsInStage(selectedNode).map((app) => (
-              <div key={app.id} className="p-3 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-between">
-                <div>
-                  <span className="font-mono font-bold text-sky-400">{app.id}</span>
-                  <span className="text-white ml-2">{app.title}</span>
-                </div>
-                <span className="text-slate-400 font-mono text-[11px]">{app.studentName}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+        )}
+      </section>
     </div>
   );
 };

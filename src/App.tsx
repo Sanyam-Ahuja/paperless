@@ -9,28 +9,19 @@ import { usePaperlessStore } from './store/usePaperlessStore';
 
 export const App: React.FC = () => {
   const { activeTab } = usePaperlessStore();
-
   return (
-    <div className="min-h-screen bg-[#F7F6F2] text-slate-800 flex flex-col font-sans selection:bg-amber-200 selection:text-amber-900">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 w-full max-w-[1320px] mx-auto px-4 md:px-8 py-8">
         {activeTab === 'tracker' && <ApplicationTrackerView />}
         {activeTab === 'new_app' && <NewApplicationView />}
         {activeTab === 'approval_desk' && <ApprovalDeskView />}
         {activeTab === 'state_machine' && <StateMachineGraphView />}
         {activeTab === 'analytics' && <BottleneckAnalyticsView />}
       </main>
-
-      <footer className="border-t border-stone-300 bg-[#EFECE6] py-6 text-center text-xs text-stone-600">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="font-semibold text-stone-800">
-            © 2026 Office of the University Registrar • Official E-Governance & Academic Petition Portal
-          </p>
-          <p className="font-mono text-[11px] text-stone-500">
-            Formally Verified Finite State Automaton • Authenticated Audit Trail
-          </p>
-        </div>
+      <footer className="max-w-[1320px] w-full mx-auto px-4 md:px-8 py-5 text-[13px] text-faint cond uppercase tracking-wider flex flex-col sm:flex-row justify-between gap-1">
+        <span>Demonstration records · stored in this browser only</span>
+        <span>Switch “Acting as” to sign from another desk</span>
       </footer>
     </div>
   );

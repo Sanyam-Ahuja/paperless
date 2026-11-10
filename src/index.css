@@ -1,25 +1,63 @@
 @import "tailwindcss";
 
+/* Paperless — the registrar's triplicate forms, made digital.
+   Registry-blue chrome over a grey blotter; each document is a coloured carbon copy
+   (canary in process, blue returned, pink rejected, white sanctioned) printed in navy,
+   filled by typewriter, and marked with violet rubber stamps. */
+@theme {
+  --color-registry: #1b2a6b;
+  --color-registry-deep: #111c4d;
+  --color-blotter: #c3c9d6;
+  --color-blotter-dark: #a9b1c2;
+  --color-navy: #1b2a6b;
+  --color-canary: #fff1a8;
+  --color-pinkcopy: #ffd3dc;
+  --color-bluecopy: #d3e4ff;
+  --color-whitecopy: #fdfdfb;
+  --color-violet: #5b2d8e;
+  --color-stampred: #b3202a;
+  --color-typed: #1d1d1f;
+  --color-faint: #4a5584;
+  --font-sans: "Archivo", "Arial Narrow", sans-serif;
+  --font-mono: "Courier Prime", "Courier New", monospace;
+}
+
 @layer base {
-  body {
-    background-color: #f7f6f2;
-    color: #1e293b;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  }
+  body { background: var(--color-blotter); color: var(--color-navy); font-family: var(--font-sans); font-size: 15px; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--color-canary); color: var(--color-navy); }
+  :focus-visible { outline: 2px solid var(--color-violet); outline-offset: 2px; }
+  input, select, textarea, button { font: inherit; }
+}
 
-  .paper-card {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  }
-
-  .paper-elevation {
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  }
-
-  .seal-border {
-    border: 2px dashed #991b1b;
+@layer components {
+  .cond { font-stretch: 72%; }
+  .wide { font-stretch: 118%; }
+  .formlabel { font-stretch: 78%; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; color: var(--color-faint); }
+  .typed { font-family: var(--font-mono); color: var(--color-typed); }
+  .sheet { position: relative; border: 1px solid rgba(27,42,107,.35); box-shadow: 0 1px 0 rgba(27,42,107,.15), 0 14px 28px -16px rgba(17,28,77,.55); }
+  .sheet-perf::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: radial-gradient(circle at 4px 3px, var(--color-blotter) 1.6px, transparent 2px) 0 0 / 9px 6px repeat-x; }
+  .box { border: 1px solid var(--color-navy); }
+  .typein { width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--color-navy); font-family: var(--font-mono); color: var(--color-typed); padding: 2px 0; font-size: 15px; }
+  .typein:focus { outline: none; background: rgba(255,255,255,.55); border-bottom-width: 2px; }
+  .typein::placeholder { color: #8a90ad; }
+  .navbtn { font-stretch: 85%; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.55rem 1rem; border: 1.5px solid var(--color-navy); background: var(--color-whitecopy); color: var(--color-navy); display: inline-flex; align-items: center; gap: 0.45rem; }
+  .navbtn:hover:not(:disabled) { background: var(--color-navy); color: #fff; }
+  .navbtn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .navbtn-solid { background: var(--color-navy); color: #fff; }
+  .navbtn-solid:hover:not(:disabled) { background: var(--color-registry-deep); }
+  .stamp {
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+    border: 3px double currentColor; padding: 0.3rem 0.9rem; font-stretch: 80%; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 0.08em; line-height: 1; transform: rotate(-8deg);
+    mix-blend-mode: multiply; opacity: 0.88;
+    -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 60%, rgba(0,0,0,.75) 75%, #000 90%);
   }
 }
+
+@keyframes thunk { 0% { transform: rotate(-8deg) scale(1.6); opacity: 0; } 60% { transform: rotate(-8deg) scale(0.96); opacity: 0.95; } 100% { transform: rotate(-8deg) scale(1); opacity: 0.88; } }
+.thunk { animation: thunk 260ms cubic-bezier(.16,1,.3,1) both; }
+@media (prefers-reduced-motion: reduce) { .thunk { animation: none; } }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-blotter-dark); }
+::-webkit-scrollbar-thumb { background: var(--color-navy); }
