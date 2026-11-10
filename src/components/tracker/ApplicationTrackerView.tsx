@@ -52,27 +52,27 @@ export const ApplicationTrackerView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-semibold uppercase">
-              Administrative Ledger
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-semibold uppercase">
+              Official Docket Registry
             </span>
-            <span className="text-xs text-slate-500 font-mono">
+            <span className="text-xs text-stone-500 font-mono">
               {applications.length} Electronic Petitions Recorded
             </span>
           </div>
-          <h2 className="text-xl font-bold text-white mt-2">University Petitions & Sanctions Tracker</h2>
-          <p className="text-sm text-slate-400 max-w-2xl mt-1">
-            Real-time audit ledger for student requests. Every stage transition is digitally signed with non-repudiable remarks.
+          <h2 className="text-xl font-bold text-slate-900 font-serif mt-2">Institutional Petitions & Sanctions Ledger</h2>
+          <p className="text-sm text-slate-600 max-w-2xl mt-1">
+            Real-time administrative ledger for student petitions. Every stage transition is digitally signed with non-repudiable remarks.
           </p>
         </div>
 
         <button
           onClick={() => setActiveTab('new_app')}
-          className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs shadow-lg shadow-sky-600/20 flex items-center space-x-1.5 self-start md:self-auto transition-all"
+          className="px-4 py-2.5 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-medium text-xs shadow-sm flex items-center space-x-1.5 self-start md:self-auto transition-all"
         >
-          <span>Submit New Petition</span>
+          <span>Draft Formal Petition</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
@@ -80,13 +80,13 @@ export const ApplicationTrackerView: React.FC = () => {
       {/* Filter and Search Bar */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
         <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+          <Search className="w-4 h-4 absolute left-3 top-3 text-stone-400" />
           <input
             type="text"
-            placeholder="Search by ID, student, or title..."
+            placeholder="Search by Docket ID, student, or title..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+            className="w-full pl-9 pr-4 py-2 bg-white border border-stone-300 rounded-xl text-slate-900 placeholder-stone-400 focus:outline-none focus:border-amber-700 shadow-2xs"
           />
         </div>
 
@@ -94,7 +94,7 @@ export const ApplicationTrackerView: React.FC = () => {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 focus:outline-none font-medium"
+            className="px-3 py-2 bg-white border border-stone-300 rounded-xl text-slate-700 focus:outline-none font-medium shadow-2xs"
           >
             <option value="all">All Procedures</option>
             {Object.values(WORKFLOW_DEFINITIONS).map((def) => (
@@ -102,15 +102,15 @@ export const ApplicationTrackerView: React.FC = () => {
             ))}
           </select>
 
-          <div className="flex items-center space-x-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+          <div className="flex items-center space-x-1 bg-white p-1 rounded-xl border border-stone-300 shadow-2xs">
             {['all', 'active', 'completed', 'rejected'].map((s) => (
               <button
                 key={s}
                 onClick={() => setFilterStage(s)}
-                className={`px-3 py-1 rounded-lg capitalize transition-colors ${
+                className={`px-3 py-1 rounded-lg capitalize transition-colors font-medium ${
                   filterStage === s
-                    ? 'bg-sky-500/20 text-sky-300 font-medium'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-amber-100 text-amber-900 shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
                 {s}
@@ -130,48 +130,48 @@ export const ApplicationTrackerView: React.FC = () => {
           return (
             <div
               key={app.id}
-              className="bg-[#111827] border border-slate-800 hover:border-slate-700 rounded-2xl p-5 shadow-lg transition-all space-y-4"
+              className="bg-white border border-stone-200 hover:border-amber-600/40 rounded-2xl p-5 shadow-sm transition-all space-y-4"
             >
               {/* Header Row */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
                 <div className="flex items-center space-x-3">
-                  <span className="font-mono text-xs font-bold text-sky-400 bg-sky-950/60 border border-sky-800/60 px-2 py-0.5 rounded-lg">
+                  <span className="font-mono text-xs font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-lg">
                     {app.id}
                   </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 uppercase font-semibold">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-stone-100 text-stone-700 uppercase font-semibold">
                     {app.workflowType.replace(/_/g, ' ')}
                   </span>
                   {app.priority === 'urgent' && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase font-bold animate-pulse">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 uppercase font-bold animate-pulse">
                       Urgent SLA
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2 text-xs text-slate-400 font-mono">
+                <div className="flex items-center space-x-2 text-xs text-stone-500 font-mono">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>Submitted {app.createdAt.split('T')[0] || app.createdAt.split(' ')[0]}</span>
+                  <span>Filed {app.createdAt.split('T')[0] || app.createdAt.split(' ')[0]}</span>
                 </div>
               </div>
 
               {/* Title & Student Meta */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-bold text-white leading-snug">
+                  <h3 className="text-base font-bold text-slate-900 font-serif leading-snug">
                     {app.title}
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1 font-sans">
-                    <span className="text-slate-200 font-medium">{app.studentName}</span> ({app.studentId}) • {app.department} • {app.semester}
+                  <p className="text-xs text-stone-600 mt-1 font-sans">
+                    <span className="text-slate-900 font-semibold">{app.studentName}</span> ({app.studentId}) • {app.department} • {app.semester}
                   </p>
                 </div>
 
                 <div className="flex items-center space-x-2 flex-shrink-0">
                   <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 ${
                     isCompleted
-                      ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/60'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
                       : isRejected
-                      ? 'bg-rose-950/60 text-rose-400 border border-rose-800/60'
-                      : 'bg-amber-950/60 text-amber-300 border border-amber-800/60'
+                      ? 'bg-red-50 text-red-800 border border-red-300'
+                      : 'bg-amber-50 text-amber-900 border border-amber-300'
                   }`}>
                     {isCompleted ? <CheckCircle className="w-3.5 h-3.5" /> : isRejected ? <AlertCircle className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
                     <span>{currentConfig.label}</span>
@@ -192,20 +192,20 @@ export const ApplicationTrackerView: React.FC = () => {
                         key={stage}
                         className={`p-2 rounded-xl border flex flex-col justify-between ${
                           isPassed
-                            ? 'bg-emerald-950/20 border-emerald-800/40 text-emerald-300'
+                            ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900'
                             : isCurrent
-                            ? 'bg-amber-950/30 border-amber-500/60 text-amber-200 ring-1 ring-amber-500/30'
-                            : 'bg-slate-900/40 border-slate-800/60 text-slate-600'
+                            ? 'bg-amber-100 border-amber-400 text-amber-950 ring-1 ring-amber-400/50 shadow-xs'
+                            : 'bg-stone-50 border-stone-200 text-stone-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] uppercase font-bold tracking-tight">
                             {stageConfig.label}
                           </span>
-                          {isPassed && <CheckCircle className="w-3 h-3 text-emerald-400" />}
-                          {isCurrent && <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />}
+                          {isPassed && <CheckCircle className="w-3 h-3 text-emerald-600" />}
+                          {isCurrent && <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping" />}
                         </div>
-                        <span className="text-[9px] text-slate-500 mt-1 capitalize">
+                        <span className="text-[9px] text-stone-500 mt-1 capitalize">
                           {stageConfig.responsibleRole?.replace(/_/g, ' ') || 'Authority'}
                         </span>
                       </div>
@@ -215,12 +215,12 @@ export const ApplicationTrackerView: React.FC = () => {
               </div>
 
               {/* Footer Row: Attachments & Audit Inspector Trigger */}
-              <div className="flex items-center justify-between pt-3 border-t border-slate-800/80 text-xs">
-                <div className="flex items-center space-x-2 text-slate-400">
-                  <Paperclip className="w-3.5 h-3.5" />
-                  <span>{app.attachments.length} Document Attachments</span>
+              <div className="flex items-center justify-between pt-3 border-t border-stone-100 text-xs">
+                <div className="flex items-center space-x-2 text-stone-600">
+                  <Paperclip className="w-3.5 h-3.5 text-stone-400" />
+                  <span>{app.attachments.length} Sealed Evidences</span>
                   {app.attachments.every((a) => a.verified) && (
-                    <span className="text-emerald-400 text-[10px] font-mono flex items-center space-x-0.5">
+                    <span className="text-emerald-700 text-[10px] font-mono flex items-center space-x-0.5">
                       <ShieldCheck className="w-3 h-3" />
                       <span>Verified</span>
                     </span>
@@ -230,9 +230,9 @@ export const ApplicationTrackerView: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => setInspectedApp(app)}
-                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center space-x-1 font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-slate-800 flex items-center space-x-1 font-medium transition-colors"
                   >
-                    <History className="w-3.5 h-3.5 text-sky-400" />
+                    <History className="w-3.5 h-3.5 text-amber-800" />
                     <span>Audit Trail ({app.history.length})</span>
                   </button>
                 </div>

@@ -11,7 +11,7 @@ export const App: React.FC = () => {
   const { activeTab } = usePaperlessStore();
 
   return (
-    <div className="min-h-screen bg-[#0B1120] text-slate-100 flex flex-col font-sans selection:bg-sky-500/30 selection:text-sky-300">
+    <div className="min-h-screen bg-[#F7F6F2] text-slate-800 flex flex-col font-sans selection:bg-amber-200 selection:text-amber-900">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -22,11 +22,13 @@ export const App: React.FC = () => {
         {activeTab === 'analytics' && <BottleneckAnalyticsView />}
       </main>
 
-      <footer className="border-t border-slate-800 bg-[#070B14] py-6 text-center text-xs text-slate-500">
+      <footer className="border-t border-stone-300 bg-[#EFECE6] py-6 text-center text-xs text-stone-600">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© 2026 Paperless — University Administrative Workflow Automation & State Machine</p>
-          <p className="font-mono text-[11px] text-slate-400">
-            Deterministic Finite Automaton • Cryptographic Audit Log • Zero Server Footprint
+          <p className="font-semibold text-stone-800">
+            © 2026 Office of the University Registrar • Official E-Governance & Academic Petition Portal
+          </p>
+          <p className="font-mono text-[11px] text-stone-500">
+            Formally Verified Finite State Automaton • Authenticated Audit Trail
           </p>
         </div>
       </footer>

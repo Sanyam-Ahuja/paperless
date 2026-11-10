@@ -2,12 +2,24 @@
 
 @layer base {
   body {
-    background-color: #0b1120;
-    color: #f1f5f9;
+    background-color: #f7f6f2;
+    color: #1e293b;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
 
-  code, pre {
-    font-family: 'JetBrains Mono', monospace;
+  .paper-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .paper-elevation {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  }
+
+  .seal-border {
+    border: 2px dashed #991b1b;
   }
 }
